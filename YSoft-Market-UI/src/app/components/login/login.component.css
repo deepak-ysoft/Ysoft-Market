@@ -1,0 +1,54 @@
+.password-toggle {
+   cursor: pointer;
+   color: rgba(1, 58, 58, 0.5);
+   border-radius: 10px;
+}
+.password-toggle:hover {
+   color: darkblue;
+   cursor: pointer;
+   box-shadow:
+      0 0 6px rgb(154, 166, 198),
+      0 0 12px rgba(186, 245, 245, 0.727);
+}
+.card {
+   box-shadow: 0 5px 20px 10px #d0cfcf;
+   background-color: #f7f7f7;
+}
+
+.ysoft-logo {
+   position: absolute;
+   top: -32px;
+   left: 34%;
+   padding: 9px;
+   width: 35%;
+   border-radius: 15px;
+   background-color: white;
+   border: 1px solid rgb(222, 211, 211);
+}
+
+/* General Input Field Style */
+.magic-input {
+   box-shadow:
+      0 3px 5px rgba(0, 0, 0, 0.1),
+      0 1px 3px rgba(255, 255, 255, 0.2);
+   border-radius: 12px;
+   color: rgb(0, 0, 0);
+   font-size: 18px;
+   padding: 8px 16px;
+}
+
+/* Glowing Effect on Focus */
+.magic-input:focus {
+   box-shadow:
+      0 0 8px rgb(166, 166, 166),
+      0 0 20px rgb(190, 190, 190);
+   transform: scale(1.02);
+}
+
+/* Additional Hover Effect */
+.magic-input:hover {
+   cursor: pointer;
+   box-shadow:
+      0 0 6px rgb(154, 166, 198),
+      0 0 12px rgba(186, 245, 245, 0.727);
+}

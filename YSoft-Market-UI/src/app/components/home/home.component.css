@@ -1,0 +1,198 @@
+.fa-brands {
+   color: black;
+   font-size: 22px;
+   transition:
+      transform 0.3s ease,
+      color 0.3s ease;
+}
+
+.fa-brands:hover {
+   color: rgb(248, 91, 0);
+   transform: scale(1) translateY(-2px); /* Moves the icon upwards */
+}
+
+.zoom-container {
+   transition: transform 0.3s ease-in-out;
+   width: 100%;
+   display: block;
+}
+
+.zoom-container img {
+   width: 100%;
+}
+
+.zoom-container-f-mid {
+   transition: transform 0.3s ease-in-out;
+   width: 100%;
+   display: block;
+}
+
+.zoom-container-f-mid img {
+   max-width: 306px;
+   width: 100%;
+   max-height: 204px;
+}
+
+.zoom-container-f-small {
+   transition: transform 0.3s ease-in-out;
+   max-width: 100px;
+   display: block;
+}
+
+.zoom-container-f-small img {
+   max-width: 90px;
+   max-height: 62px;
+}
+
+.zoom-container-small {
+   transition: transform 0.3s ease-in-out;
+   display: block;
+   max-width: 220px;
+}
+
+.zoom-container-small img {
+   max-width: 200px;
+   max-height: 125px;
+}
+
+a {
+   text-decoration: none;
+   color: rgb(68, 62, 62);
+   font-size: small;
+}
+
+/* Apply hover effect to .image-containt when hovering over the anchor */
+a:hover .image-containt {
+   color: rgb(248, 91, 0);
+   transition: color 0.3s ease-in-out;
+}
+
+.overlay-container:hover .zoom-container,
+.overlay-container:hover .zoom-container-f-mid,
+.overlay-container:hover .zoom-container-f-small,
+.overlay-container:hover .zoom-container-small {
+   transform: scale(1.1); /* Zoom effect on hover */
+}
+
+.max-height {
+   max-height: 608px;
+   overflow: auto;
+
+   -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
+   scrollbar-width: none; /* Hide scrollbar for Firefox */
+}
+
+.overlay-container {
+   position: relative;
+   overflow: hidden;
+}
+
+.overlay-content {
+   position: absolute;
+   bottom: 0;
+   left: 0;
+   width: 100%;
+   background: rgba(28, 26, 24, 0.533); /* Semi-transparent background */
+   padding: 10px;
+   z-index: 2;
+   transition: background 0.3s; /* Smooth background transition */
+}
+
+/* Change background color when hovering over .overlay-container */
+.overlay-container:hover .overlay-content {
+   background: rgb(248, 91, 0);
+}
+
+.about-content {
+   position: absolute;
+   bottom: -30px; /* Moves box slightly down */
+   right: -60px; /* Adjust as needed */
+   background: white;
+   padding: 15px;
+   max-width: 70%;
+   border-radius: 5px;
+   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+   border-left: 4px solid rgb(248, 91, 0); /* Left accent border */
+   z-index: 10; /* Ensures it appears above other elements */
+}
+
+.overlay-container-about {
+   position: relative;
+   display: inline-block;
+}
+
+.overlay-container-about:hover .zoom-container {
+   transform: scale(1.1); /* Zoom effect on hover */
+}
+
+.about-content p {
+   font-size: 14px;
+}
+
+.about-content p {
+   font-size: 14px;
+}
+
+.text-orange {
+   color: rgb(248, 91, 0);
+}
+
+.font-style {
+   font-family: initial;
+}
+
+.logos-slider {
+   width: 100%;
+   margin: auto;
+   overflow: hidden;
+}
+
+.logo-slide {
+   text-align: center;
+   padding: 10px;
+}
+
+.logo-slide img {
+   max-width: 50%;
+   min-width: 100px;
+   transition: transform 0.3s ease-in-out;
+}
+
+.logo-slide img:hover {
+   transform: scale(1.1);
+}
+
+.main {
+   overflow-x: hidden;
+   background-color: rgb(244, 246, 250);
+}
+
+.slide-img {
+   max-width: 100%;
+   min-width: 200px;
+}
+
+.form-container {
+   overflow: hidden;
+   padding: 10px;
+   border-radius: 5px;
+   box-shadow: 0 4px 10px 6px rgba(0, 0, 0, 0.1);
+}
+
+.news-section {
+   padding: 20px;
+   border-radius: 5px;
+   transition: transform 0.4s ease-in-out;
+}
+
+.text-danger {
+   font-size: 0.875rem;
+}
+
+.add-btn-color {
+   background-color: rgb(255, 138, 71);
+}
+.add-btn-color:hover {
+   background-color: rgb(248, 91, 0);
+   color: white;
+}
