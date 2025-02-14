@@ -8,6 +8,5 @@ namespace Ysoft_Market_API.Models
         {
         }
         public DbSet<NewsModel> News { get; set; }
-        public DbSet<Login> Login { get; set; }
     }
 }

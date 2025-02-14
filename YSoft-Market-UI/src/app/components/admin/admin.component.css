@@ -1,0 +1,68 @@
+.table th,
+.table td {
+   text-align: center;
+   vertical-align: middle;
+   max-width: 200px;
+}
+
+/* General Input Field Style */
+.magic-input {
+   box-shadow:
+      0 3px 5px rgba(0, 0, 0, 0.1),
+      0 1px 3px rgba(255, 255, 255, 0.2);
+   border-radius: 12px;
+   color: rgb(0, 0, 0);
+   font-size: 18px;
+   padding: 8px 16px;
+}
+
+/* Glowing Effect on Focus */
+.magic-input:focus {
+   box-shadow:
+      0 5px 8px rgba(0, 0, 0, 0.1),
+      0 5px 10px rgba(255, 255, 255, 0.2);
+   transform: scale(1.02);
+}
+
+/* Additional Hover Effect */
+.magic-input:hover {
+   cursor: pointer;
+   box-shadow:
+      0 0 6px rgba(0, 0, 0, 0.1),
+      0 0 12px rgba(255, 255, 255, 0.2);
+}
+
+.magic-inputFile[type="file"]::file-selector-button {
+   padding: 0.2em 0.4em;
+   border-radius: 0.6em;
+   background-color: hsl(205, 70%, 91%);
+}
+
+.close-icon {
+   color: red;
+   transition:
+      transform 0.2s ease,
+      color 0.2s ease;
+   border: 1px solid;
+   padding: 14px 6px;
+   border-radius: 50%;
+}
+
+.close-icon:hover {
+   color: darkred;
+   transform: scale(1.2);
+}
+
+.list-btn {
+   cursor: pointer;
+   font-size: large;
+   font-weight: 600;
+   border: 1px solid rgb(158, 158, 158);
+   padding: 0px 15px;
+   border-radius: 5px;
+}
+
+.list-btn:hover {
+   border: 1px solid rgb(82, 82, 82);
+   box-shadow: 0 1px 3px black;
+}

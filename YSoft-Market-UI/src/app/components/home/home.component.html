@@ -2,9 +2,9 @@
   <header>
     <div class="container">
       <div
-        class="d-flex justify-content-between align-items-center pt-2 pt-lg-3"
+        class="d-flex align-items-center justify-content-between pt-2 pt-lg-3"
       >
-        <div class="d-lg-flex align-items-center gap-4">
+        <div class="d-flex align-items-center gap-2 gap-lg-4">
           <a href="#"><i class="fa-brands fa-facebook"></i></a>
           <a href="#"><i class="fa-brands fa-instagram"></i></a>
           <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
@@ -26,423 +26,386 @@
             </a>
           </div>
         </a>
-
-        <button *ngIf="isLoggedIn" class="btn btn-primary" (click)="logOut()">
-          Logout
-        </button>
       </div>
     </div>
     <hr />
   </header>
 
-  <div class="container d-flex justify-content-end" *ngIf="isLoggedIn">
-    <button class="btn add-btn-color mb-3" (click)="toggleForm()">
-      {{ showForm ? "Cancel" : "Add News" }}
+  <div class="container d-flex align-items-center">
+    <button
+      class="btn add-btn-color mb-3"
+      (click)="GoBack()"
+      *ngIf="isShowSlider"
+    >
+      <i class="fa fa-arrow-left" aria-hidden="true"></i>
     </button>
+    <a routerLink="/admin"> admin</a>
   </div>
 
-  <!-- Animated Form (Placed Outside Section) -->
-  <div
-    *ngIf="isLoggedIn"
-    [@formAnimation]="showForm ? 'visible' : 'hidden'"
-    class="form-container container mb-3"
-  >
-    <form [formGroup]="newsForm" (ngSubmit)="submitForm()">
-      <input type="hidden" formControlName="id" />
-      <input type="hidden" formControlName="type" />
-      <input type="hidden" formControlName="subType" />
-      <div class="row" *ngIf="!isShowDelete">
-        <div class="mb-3 col">
-          <label for="type" class="form-label">Type</label>
-          <select class="form-select" formControlName="type">
-            <option value="" disabled>Select Type</option>
-            <option value="Featured News">Featured News</option>
-            <option value="Latest News">Latest News</option>
-            <option value="Popular News">Popular News</option>
-          </select>
-          <div
-            *ngIf="
-              newsForm.get('type')?.invalid && newsForm.get('type')?.touched
-            "
-            class="text-danger"
-          >
-            Type is required.
-          </div>
-        </div>
-        <div class="mb-3 col">
-          <label for="subType" class="form-label">Sub Type</label>
-          <select class="form-select" formControlName="subType">
-            <option value="" disabled>Select Sub Type</option>
-            <option value="Large">
-              Large (Recommended Image Size ratio 3(hight) : 2(width))
-            </option>
-            <option value="Medium">
-              Medium (Recommended Image Size ratio 2(hight) : 3(width))
-            </option>
-            <option value="Small">
-              Small (Recommended Image Size ratio 2(hight) : 3(width))
-            </option>
-          </select>
-          <div
-            *ngIf="
-              newsForm.get('subType')?.invalid &&
-              newsForm.get('subType')?.touched
-            "
-            class="text-danger"
-          >
-            SubType is required.
-          </div>
-        </div>
-      </div>
+  <!-- Main News Slider -->
 
-      <div class="row">
-        <div class="mb-3 col">
-          <label for="date" class="form-label">Date</label>
-          <input
-            type="date"
-            class="form-control"
-            id="date"
-            formControlName="date"
-          />
-          <div
-            *ngIf="
-              newsForm.get('date')?.invalid && newsForm.get('date')?.touched
-            "
-            class="text-danger"
-          >
-            Date is required.
-          </div>
-        </div>
+  <section class="position-relative container" *ngIf="isShowSlider">
+    <!-- Left Button -->
+    <button class="slider-btn left" (click)="slickModal.slickPrev()">❮</button>
 
-        <div class="mb-3 col">
-          <label for="photo" class="form-label">Upload Photo</label>
-          <input
-            type="file"
-            class="form-control"
-            id="photo"
-            (change)="onFileSelected($event)"
-          />
-        </div>
-      </div>
+    <ngx-slick-carousel
+      #slickModal="slick-carousel"
+      [config]="slideConfigSlide"
+      class="news-slider"
+    >
+      <div ngxSlickItem *ngFor="let list of SliderList" class="news-slide m-3">
+        <div class="position-relative mb-3">
+          <div class="d-flex main-container">
+            <!-- Left side: Image -->
+            <div class="image-container">
+              <img
+                [src]="newsImage + list.imagePath"
+                alt="Discover"
+                class="img-fluid rounded slide-img-Large"
+              />
+            </div>
 
-      <div class="row">
-        <div class="mb-3 col">
-          <label for="content" class="form-label">Content</label>
-          <textarea
-            class="form-control"
-            id="content"
-            formControlName="content"
-            rows="3"
-          ></textarea>
-          <div
-            *ngIf="
-              newsForm.get('content')?.invalid &&
-              newsForm.get('content')?.touched
-            "
-            class="text-danger"
-          >
-            Content must be at least 10 characters long.
-          </div>
-        </div>
-        <div class="mb-3 col">
-          <label for="comments" class="form-label">Comments</label>
-          <textarea
-            class="form-control"
-            id="comments"
-            formControlName="comments"
-            rows="3"
-          ></textarea>
-        </div>
-      </div>
-
-      <button
-        type="submit"
-        class="btn btn-success"
-        [disabled]="newsForm.invalid"
-      >
-        Submit
-      </button>
-
-      <button
-        type="submit"
-        class="ms-5 btn btn-danger"
-        *ngIf="isShowDelete"
-        (click)="deleteNews()"
-      >
-        Delete
-      </button>
-    </form>
-  </div>
-
-  <!-- Featured News section -->
-
-  <section class="mb-4 news-section" [@sectionMove]="showForm ? 'down' : 'up'">
-    <div class="container">
-      <div class="row">
-        <div
-          class="d-flex align-content-center justify-content-between pb-lg-5 pb-md-4 pb-3"
-        >
-          <h2>Featured News</h2>
-        </div>
-        <div class="col-xl-6 col-lg-12">
-          <div class="flex-column gap-3 mb-3">
-            <div class="row d-flex justify-content-between">
-              <div
-                class="position-relative col-6 mb-3"
-                *ngFor="let featureLarge of FeaturedNewsLargeList"
-              >
-                <div
-                  class="position-relative overlay-container"
-                  (click)="scrollToTopAndEdit(featureLarge)"
-                >
-                  <div class="zoom-container">
-                    <img
-                      [src]="newsImage + featureLarge.imagePath"
-                      alt="Discover"
-                    />
-                  </div>
-                  <div class="overlay-content p-3 text-white">
-                    <h5 class="fw-bold">
-                      {{ featureLarge.content }}
-                    </h5>
-                    <span class="fst-italic small">
-                      {{ featureLarge.date | date : "MMMM d, y" }}
-                      <span class="mx-2">•</span>
-                      {{ featureLarge.comments }}
-                    </span>
-                  </div>
-                </div>
-              </div>
+            <!-- Right side: Content -->
+            <div class="content-container">
+              <h5 class="fw-bold">
+                {{ list.content }}
+              </h5>
+              <span class="fst-italic small">
+                {{ list.date | date : "MMMM d, y" }} <br /><br />
+                Comments <span class="mx-2">-</span> {{ list.comments }}
+              </span>
             </div>
           </div>
         </div>
-        <div class="col-xl-6 col-lg-12">
-          <div class="row">
-            <div
-              class="col position-relative"
-              *ngFor="let featureMedium of FeaturedNewsMediumList"
-            >
-              <div
-                class="position-relative overlay-container"
-                (click)="scrollToTopAndEdit(featureMedium)"
-              >
-                <a>
-                  <div class="zoom-container-f-mid">
-                    <img
-                      [src]="newsImage + featureMedium.imagePath"
-                      alt="SpareTime"
-                    />
-                  </div>
-                  <div class="flex-grow-1 image-containt">
-                    <h5 class="pt-2">
-                      {{ featureMedium.content }}
-                    </h5>
-                    <div class="fst-italic small">
-                      <span class="date">{{
-                        featureMedium.date | date : "MMMM d, y"
-                      }}</span>
-                      <span class="mx-2">•</span>
-                      <span class="comment">{{ featureMedium.comments }}</span>
-                    </div>
-                  </div></a
-                >
-              </div>
-              <hr />
+      </div>
+    </ngx-slick-carousel>
+
+    <!-- Right Button -->
+    <button class="slider-btn right" (click)="slickModal.slickNext()">❯</button>
+  </section>
+
+  <!-- <section>
+    <ngx-slick-carousel
+      *ngIf="isShowSlider"
+      #slickModal="slick-carousel"
+      [config]="slideConfigSlide"
+      class="news-slider p-2"
+    >
+      <div ngxSlickItem *ngFor="let list of SliderList" class="news-slide m-3">
+        <div class="position-relative col-12 mb-3">
+          <div
+            class="position-relative overlay-container-news"
+            (click)="scrollToTopAndEdit(list)"
+          >
+            <div class="zoom-container-news">
+              <img
+                [src]="newsImage + list.imagePath"
+                alt="Discover"
+                class="img-fluid rounded"
+              />
+            </div>
+            <div class="overlay-content-news p-3 text-white">
+              <h5 class="fw-bold">
+                {{ list.content }}
+              </h5>
+              <span class="fst-italic small">
+                {{ list.date | date : "MMMM d, y" }}
+                <span class="mx-2">•</span>
+                {{ list.comments }} Comments
+              </span>
             </div>
           </div>
-          <div class="d-flex">
-            <div class="d-flex flex-wrap gap-3">
-              <div class="row">
+        </div>
+      </div>
+    </ngx-slick-carousel>
+  </section> -->
+
+  <!-- Main News Slider -->
+  <div *ngIf="!isShowSlider">
+    <!-- Featured News section -->
+
+    <section class="mb-4 news-section">
+      <div class="container">
+        <div class="row">
+          <div
+            class="d-flex align-content-center justify-content-between pb-lg-5 pb-md-4 pb-3"
+          >
+            <h1 class="f-family">Featured News</h1>
+          </div>
+          <div class="col-xl-6 col-lg-12">
+            <div class="flex-column gap-3 mb-3">
+              <div class="row d-flex justify-content-between">
                 <div
-                  href="#"
-                  class="col-lg-6 mt-2 position-relative"
-                  *ngFor="let featureSmall of FeaturedNewsSmallList"
+                  [@zoomInAnimation]="animationState"
+                  class="position-relative col-6 mb-3"
+                  *ngFor="let featureLarge of filteredFeaturedNewsLargeList"
                 >
                   <div
                     class="position-relative overlay-container"
-                    (click)="scrollToTopAndEdit(featureSmall)"
+                    (click)="
+                      clickToSlideMainNews(
+                        featureLarge.type,
+                        featureLarge.subType
+                      )
+                    "
                   >
-                    <a class="d-flex gap-3">
-                      <div class="zoom-container-f-small">
-                        <img
-                          [src]="newsImage + featureSmall.imagePath"
-                          alt="SerialKiller"
-                        />
-                      </div>
-                      <div class="d-flex flex-column image-containt">
-                        <h6>
-                          {{ featureSmall.content }}
-                        </h6>
-                        <span class="date fst-italic small">{{
-                          featureSmall.date | date : "MMMM d, y"
+                    <div class="zoom-container">
+                      <img
+                        [src]="newsImage + featureLarge.imagePath"
+                        alt="Discover"
+                      />
+                    </div>
+                    <div class="overlay-content p-3 text-white">
+                      <h5 class="fw-bold">
+                        {{ featureLarge.content }}
+                      </h5>
+                      <span class="fst-italic small">
+                        {{ featureLarge.date | date : "MMMM d, y" }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-6 col-lg-12">
+            <div class="row">
+              <div
+                class="col position-relative"
+                [@zoomInAnimation]="animationState"
+                *ngFor="let featureMedium of filteredFeaturedNewsMediumList"
+                (click)="
+                  clickToSlideMainNews(
+                    featureMedium.type,
+                    featureMedium.subType
+                  )
+                "
+              >
+                <div class="position-relative overlay-container">
+                  <a>
+                    <div class="zoom-container-f-mid">
+                      <img
+                        [src]="newsImage + featureMedium.imagePath"
+                        alt="SpareTime"
+                      />
+                    </div>
+                    <div class="flex-grow-1 image-containt">
+                      <h5 class="pt-2">
+                        {{ featureMedium.content }}
+                      </h5>
+                      <div class="fst-italic small">
+                        <span class="date">{{
+                          featureMedium.date | date : "MMMM d, y"
                         }}</span>
                       </div>
-                    </a>
-                  </div>
+                    </div></a
+                  >
                 </div>
+                <hr />
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Featured News section end-->
-
-  <hr />
-
-  <!-- Letest News Section -->
-
-  <section class="mb-4">
-    <div class="container">
-      <div
-        class="d-flex align-content-center justify-content-between pb-lg-5 pb-md-4 pb-3"
-      >
-        <h2>Latest News</h2>
-      </div>
-      <div class="row">
-        <div class="col-lg-8 col-md-6 max-height">
-          <div class="row">
-            <div
-              class="col-6 p-1 position-relative"
-              *ngFor="let latestSmall of LatestNewsSmallList"
-            >
-              <div
-                (click)="scrollToTopAndEdit(latestSmall)"
-                class="position-relative overlay-container"
-              >
-                <a class="d-flex gap-4">
-                  <div class="zoom-container-small">
-                    <img
-                      [src]="newsImage + latestSmall.imagePath"
-                      alt="Image1"
-                    />
-                  </div>
-                  <div class="d-flex flex-column image-containt">
-                    <h5>{{ latestSmall.content }}</h5>
-                    <div class="d-flex">
-                      <span class="date fst-italic small">{{
-                        latestSmall.date | date : "MMMM d, y"
-                      }}</span>
-                      <span class="mx-2">•</span>
-                      <span class="comments"> {{ latestSmall.comments }}</span>
+            <div class="d-flex">
+              <div class="d-flex flex-wrap gap-3">
+                <div class="row">
+                  <div
+                    [@zoomInAnimation]="animationState"
+                    class="col-lg-6 mt-2 position-relative"
+                    *ngFor="let featureSmall of filteredFeaturedNewsSmallList"
+                    (click)="
+                      clickToSlideMainNews(
+                        featureSmall.type,
+                        featureSmall.subType
+                      )
+                    "
+                  >
+                    <div class="position-relative overlay-container">
+                      <a class="d-flex gap-3">
+                        <div class="zoom-container-f-small">
+                          <img
+                            [src]="newsImage + featureSmall.imagePath"
+                            alt="SerialKiller"
+                          />
+                        </div>
+                        <div class="d-flex flex-column image-containt">
+                          <h6>
+                            {{ featureSmall.content }}
+                          </h6>
+                          <span class="date fst-italic small">{{
+                            featureSmall.date | date : "MMMM d, y"
+                          }}</span>
+                        </div>
+                      </a>
                     </div>
                   </div>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-4 col-md-6 mb-3">
-          <div class="position-relative">
-            <div
-              class="position-relative overlay-container"
-              *ngFor="let latestLarge of LatestNewsLargeList"
-              (click)="scrollToTopAndEdit(latestLarge)"
-            >
-              <div class="zoom-container">
-                <img
-                  [src]="newsImage + latestLarge.imagePath"
-                  alt="Economists"
-                />
-              </div>
-              <div class="d-flex flex-column overlay-content text-white">
-                <h4>
-                  {{ latestLarge.content }}
-                </h4>
-                <div class="fst-italic small">
-                  <span class="date fst-italic small">{{
-                    latestLarge.date | date : "MMMM d, y"
-                  }}</span>
-                  <span class="mx-2">•</span>
-                  <span class="comments"> {{ latestLarge.comments }}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Letest News Section end-->
-  <hr />
-  <!-- Popular News Section -->
+    <!-- Featured News section end-->
 
-  <section>
-    <div class="container">
-      <div
-        class="d-flex align-content-center justify-content-between pb-lg-5 pb-md-4 pb-3"
-      >
-        <h2>Popular News</h2>
-      </div>
-      <div class="row">
-        <div class="col-lg-4 col-md-6 mb-3">
-          <div class="position-relative">
-            <div
-              class="position-relative overlay-container"
-              *ngFor="let popularLarge of PopularNewsLargeList"
-              (click)="scrollToTopAndEdit(popularLarge)"
-            >
-              <div class="zoom-container">
-                <img
-                  [src]="newsImage + popularLarge.imagePath"
-                  alt="Economists"
-                />
-              </div>
-              <div class="d-flex flex-column overlay-content text-white">
-                <h4>
-                  {{ popularLarge.content }}
-                </h4>
-                <div class="fst-italic small">
-                  <span class="date fst-italic small">{{
-                    popularLarge.date | date : "MMMM d, y"
-                  }}</span>
-                  <span class="mx-2">•</span>
-                  <span class="comments"> {{ popularLarge.comments }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+    <hr />
+
+    <!-- Letest News Section -->
+
+    <section class="mb-4">
+      <div class="container">
+        <div
+          class="d-flex align-content-center justify-content-between pb-lg-5 pb-md-4 pb-3"
+        >
+          <h1 class="f-family">Latest News</h1>
         </div>
-        <div class="col-lg-8 col-md-6 max-height">
-          <div class="row">
-            <div
-              class="col-6 p-1 position-relative"
-              *ngFor="let popularSmall of PopularNewsSmallList"
-            >
+        <div class="row">
+          <div class="col-lg-8 col-md-6 max-height">
+            <div class="row">
               <div
-                (click)="scrollToTopAndEdit(popularSmall)"
-                class="position-relative overlay-container"
+                [@zoomInAnimation]="animationState"
+                class="col-6 p-1 position-relative"
+                *ngFor="let latestSmall of LatestNewsSmallList"
+                (click)="
+                  clickToSlideMainNews(latestSmall.type, latestSmall.subType)
+                "
               >
-                <a class="d-flex gap-4">
-                  <div class="zoom-container-small">
-                    <img
-                      [src]="newsImage + popularSmall.imagePath"
-                      alt="Image1"
-                    />
-                  </div>
-                  <div class="d-flex flex-column image-containt">
-                    <h5>{{ popularSmall.content }}</h5>
-                    <div class="d-flex">
-                      <span class="date fst-italic small">{{
-                        popularSmall.date | date : "MMMM d, y"
-                      }}</span>
-                      <span class="mx-2">•</span>
-                      <span class="comments"> {{ popularSmall.comments }}</span>
+                <div class="position-relative overlay-container">
+                  <a class="d-flex gap-4">
+                    <div class="zoom-container-small">
+                      <img
+                        [src]="newsImage + latestSmall.imagePath"
+                        alt="Image1"
+                      />
                     </div>
+                    <div class="d-flex flex-column image-containt">
+                      <h5>{{ latestSmall.content }}</h5>
+                      <div class="d-flex">
+                        <span class="date fst-italic small">{{
+                          latestSmall.date | date : "MMMM d, y"
+                        }}</span>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6 mb-3">
+            <div class="position-relative">
+              <div
+                class="position-relative overlay-container"
+                [@zoomInAnimation]="animationState"
+                *ngFor="let latestLarge of filteredLatestNewsLargeList"
+                (click)="
+                  clickToSlideMainNews(latestLarge.type, latestLarge.subType)
+                "
+              >
+                <div class="zoom-container">
+                  <img
+                    [src]="newsImage + latestLarge.imagePath"
+                    alt="Economists"
+                  />
+                </div>
+                <div class="d-flex flex-column overlay-content text-white">
+                  <h4>
+                    {{ latestLarge.content }}
+                  </h4>
+                  <div class="fst-italic small">
+                    <span class="date fst-italic small">{{
+                      latestLarge.date | date : "MMMM d, y"
+                    }}</span>
                   </div>
-                </a>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Popular News Section End-->
+    <!-- Letest News Section end-->
+    <hr />
+    <!-- Popular News Section -->
+
+    <section>
+      <div class="container">
+        <div
+          class="d-flex align-content-center justify-content-between pb-lg-5 pb-md-4 pb-3"
+        >
+          <h1 class="f-family">Popular News</h1>
+        </div>
+        <div class="row">
+          <div class="col-lg-4 col-md-6 mb-3">
+            <div class="position-relative">
+              <div
+                class="position-relative overlay-container"
+                [@zoomInAnimation]="animationState"
+                *ngFor="let popularLarge of filteredPopularNewsLargeList"
+                (click)="
+                  clickToSlideMainNews(popularLarge.type, popularLarge.subType)
+                "
+              >
+                <div class="zoom-container">
+                  <img
+                    [src]="newsImage + popularLarge.imagePath"
+                    alt="Economists"
+                  />
+                </div>
+                <div class="d-flex flex-column overlay-content text-white">
+                  <h4>
+                    {{ popularLarge.content }}
+                  </h4>
+                  <div class="fst-italic small">
+                    <span class="date fst-italic small">{{
+                      popularLarge.date | date : "MMMM d, y"
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-8 col-md-6 max-height">
+            <div class="row">
+              <div
+                class="col-6 p-1 position-relative"
+                [@zoomInAnimation]="animationState"
+                *ngFor="let popularSmall of PopularNewsSmallList"
+              >
+                <div
+                  class="position-relative overlay-container"
+                  (click)="
+                    clickToSlideMainNews(
+                      popularSmall.type,
+                      popularSmall.subType
+                    )
+                  "
+                >
+                  <a class="d-flex gap-4">
+                    <div class="zoom-container-small">
+                      <img
+                        [src]="newsImage + popularSmall.imagePath"
+                        alt="Image1"
+                      />
+                    </div>
+                    <div class="d-flex flex-column image-containt">
+                      <h5>{{ popularSmall.content }}</h5>
+                      <div class="d-flex">
+                        <span class="date fst-italic small">{{
+                          popularSmall.date | date : "MMMM d, y"
+                        }}</span>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Popular News Section End-->
+  </div>
   <hr />
   <!-- About Us  -->
 
@@ -476,7 +439,7 @@
             data-aos="fade-down"
           >
             <h5 class="text-orange">ABOUT LINQBUZZ</h5>
-            <h2 class="font-style">Life is more interesting with every news</h2>
+            <h2>Life is more interesting with every news</h2>
             <p>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
               eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
@@ -550,7 +513,7 @@
       <div class="d-flex align-items-center justify-content-between">
         <p>Copyright © 2024 YSoft-MARKET.</p>
 
-        <div class="d-flex align-items-center gap-4">
+        <div class="d-flex align-items-center gap-2 gap-lg-4">
           <a href="#"><i class="fa-brands fa-facebook"></i></a>
           <a href="#"><i class="fa-brands fa-instagram"></i></a>
           <a href="#"><i class="fa-brands fa-x-twitter"></i></a>

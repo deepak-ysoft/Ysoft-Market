@@ -20,6 +20,8 @@ namespace Ysoft_Market_API.Content
             if (news.Id == 0) // If news id is 0 then add new news
             {
                 news.ImagePath = UploadImage(news.Photo); // Upload the image
+                news.isDelete = false;
+                news.Show = false;
                 _context.News.Add(news);
             }
             else // If news id is not 0 then update news
@@ -34,7 +36,6 @@ namespace Ysoft_Market_API.Content
                 }
                 else
                 {
-
                     news.ImagePath = previuseNews.ImagePath;
                 }
                 var existingEntity = _context.ChangeTracker.Entries<NewsModel>().FirstOrDefault(e => e.Entity.Id == news.Id); // Get existing candidate
@@ -43,6 +44,8 @@ namespace Ysoft_Market_API.Content
                 {
                     _context.Entry(existingEntity.Entity).State = EntityState.Detached; // Detach the existing candidate
                 }
+                news.Show = true;
+                news.isDelete = false;
                 _context.News.Update(news);
             }
             int res = await _context.SaveChangesAsync();
@@ -51,12 +54,18 @@ namespace Ysoft_Market_API.Content
             return false;
         }
 
-        public async Task<bool> DeleteNews(int id)
+        public async Task<bool> DeleteNews(int id) // Delete news by id
         {
-            _context.News.Remove(_context.News.FirstOrDefault(x => x.Id == id)); // Remove the news
-            int res = await _context.SaveChangesAsync();
-            if (res > 0)
-                return true;
+            var data = await _context.News.FirstOrDefaultAsync(x => x.Id == id); // Get the news by id
+            if (data!= null) // If news is not null then delete the news
+            {
+                data.isDelete = true;
+                data.Show = false;
+                _context.News.Update(data); // Remove the news
+                int res = await _context.SaveChangesAsync();
+                if (res > 0)
+                    return true;
+            }
             return false;
         }
 

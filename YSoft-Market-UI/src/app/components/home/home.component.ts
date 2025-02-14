@@ -12,7 +12,6 @@ import {
   SlickCarouselComponent,
   SlickCarouselModule,
 } from 'ngx-slick-carousel';
-import { AuthService } from '../../services/auth.service';
 import {
   FormBuilder,
   FormGroup,
@@ -33,28 +32,29 @@ import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-home',
-  imports: [DatePipe, CommonModule, ReactiveFormsModule, SlickCarouselModule],
+  imports: [
+    RouterLink,
+    DatePipe,
+    CommonModule,
+    ReactiveFormsModule,
+    SlickCarouselModule,
+  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
   animations: [
-    trigger('formAnimation', [
-      state('hidden', style({ opacity: 0, height: '0px', overflow: 'hidden' })), // Hidden form
-      state('visible', style({ opacity: 1, height: '*' })), // Visible form
-      transition('hidden <=> visible', [animate('400ms ease-in-out')]),
-    ]),
-    trigger('sectionMove', [
-      state('up', style({ transform: 'translateY(0)' })), // Normal position
-      state('down', style({ transform: 'translateY(0)' })), // Move down
-      transition('up <=> down', [animate('400ms ease-in-out')]),
+    trigger('zoomInAnimation', [
+      state('hidden', style({ transform: 'scale(0)', opacity: 0 })), // Initially hidden
+      state('visible', style({ transform: 'scale(1)', opacity: 1 })), // Fully visible
+      transition('hidden => visible', [
+        animate('800ms ease-in-out'), // Animation duration
+      ]),
     ]),
   ],
 })
 export class HomeComponent implements OnInit {
   @ViewChild('slickModal') slickModal!: SlickCarouselComponent;
   private baseUrl = environment.apiURL;
-  newsImage: string;
   homeService = inject(HomeService);
-  AuthService = inject(AuthService);
   FeaturedNewsLargeList: News[] = [];
   FeaturedNewsMediumList: News[] = [];
   FeaturedNewsSmallList: News[] = [];
@@ -62,77 +62,25 @@ export class HomeComponent implements OnInit {
   LatestNewsSmallList: News[] = [];
   PopularNewsLargeList: News[] = [];
   PopularNewsSmallList: News[] = [];
-  EditNews: News = new News();
+  SliderList: News[] = [];
+  SliderType = '';
   router = inject(Router);
-  isLoggedIn = false;
-  showForm = false;
-  isShowDelete = false;
+  animationState = 'hidden'; // Initial state
+  isShowSlider = false;
+  newsImage: string;
+  ngOnInit(): void {
+    this.GetAllNews();
 
-  newsForm: FormGroup;
-  selectedFile: File | null = null;
-
-  constructor(
-    @Inject(PLATFORM_ID) private platformId: Object,
-    private fb: FormBuilder
-  ) {
-    this.newsForm = this.fb.group({
-      id: [0], // Hidden or auto-generated ID
-      type: ['', Validators.required], // Type is required
-      subType: ['', Validators.required],
-      content: ['', [Validators.required, Validators.minLength(10)]], // Min 10 chars
-      date: [new Date(), Validators.required], // Default to today
-      comments: [''], // Optional comments
-      imagePath: [''], // Image URL (if applicable)
-      photo: [null], // File input (handled separately)
-    });
+    // Trigger the animation after a delay
+    setTimeout(() => {
+      this.animationState = 'visible';
+    }, 200); // Delay to start animation after component loads
+  }
+  constructor() {
     this.newsImage = `${this.baseUrl}` + `uploads/newsImg/`;
   }
-  ngOnInit(): void {
-    this.isShowDelete = false;
-    this.isLoggedIn = this.AuthService.isLoggedIn();
-    this.GetAllNews();
-  }
-
-  scrollToTopAndEdit(news: News) {
-    this.isShowDelete = true;
-    this.EditNews = news;
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (this.isLoggedIn) {
-      this.showForm = true;
-      this.newsForm.patchValue({
-        id: news.id,
-        type: news.type,
-        subType: news.subType,
-        content: news.content,
-        date: news.date,
-        comments: news.comments,
-        photo: null,
-      });
-    }
-  }
-
-  deleteNews() {
-    this.homeService.DeleteNews(this.EditNews.id).subscribe((res: any) => {
-      if (res.success) {
-        this.GetAllNews();
-        this.showForm = false; // Hide form after submission
-      } else {
-        Swal.fire({
-          text: res.message,
-          icon: 'error',
-          timer: 3000, // Auto-close after 2 seconds
-          timerProgressBar: true,
-        });
-      }
-    });
-  }
-
-  toggleForm() {
-    this.showForm = !this.showForm;
-  }
-
   GetAllNews() {
+    debugger;
     this.homeService.GetAllNews().subscribe((res: any) => {
       debugger;
       this.FeaturedNewsLargeList = res.featuredNewsLarge;
@@ -143,73 +91,55 @@ export class HomeComponent implements OnInit {
       this.PopularNewsLargeList = res.popularNewsLarge;
       this.PopularNewsSmallList = res.popularNewsSmall;
     });
+    // Trigger the animation after a delay
+    setTimeout(() => {
+      this.animationState = 'visible';
+    }, 200); // Delay to start animation after component loads
   }
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-      this.newsForm.patchValue({ photo: file });
-    }
+  get filteredFeaturedNewsLargeList() {
+    return this.FeaturedNewsLargeList.filter((n) => n.show);
+  }
+  get filteredFeaturedNewsMediumList() {
+    return this.FeaturedNewsMediumList.filter((n) => n.show);
+  }
+  get filteredFeaturedNewsSmallList() {
+    return this.FeaturedNewsSmallList.filter((n) => n.show);
+  }
+  get filteredLatestNewsLargeList() {
+    return this.LatestNewsLargeList.filter((n) => n.show);
+  }
+  get filteredPopularNewsLargeList() {
+    return this.PopularNewsLargeList.filter((n) => n.show);
   }
 
-  submitForm() {
-    if (this.newsForm.valid && this.isLoggedIn) {
-      const formData = new FormData();
-      if (this.newsForm.get('id')?.value == null) {
-        formData.append('id', 0 || '0');
-      } else {
-        formData.append('id', this.newsForm.get('id')?.value || '0');
-      }
-      formData.append('type', this.newsForm.get('type')?.value || '');
-      formData.append('subType', this.newsForm.get('subType')?.value || '');
-      formData.append('content', this.newsForm.get('content')?.value || '');
-      formData.append('date', this.newsForm.get('date')?.value || '');
-      formData.append('comments', this.newsForm.get('comments')?.value || '');
-      formData.append('photo', this.selectedFile || '');
-
-      formData.forEach((value, key) => {
-        console.log(`${key}:`, value);
-      });
-      this.homeService.AddUpdateNews(formData).subscribe({
-        next: (res: any) => {
-          if (
-            res.success &&
-            res.message == 'News added/updated successfully.'
-          ) {
-            this.isShowDelete = false;
-            this.GetAllNews();
-            this.showForm = false; // Hide form after submission
-            this.newsForm.reset(); // Reset form
-            this.newsForm.markAsPristine();
-            this.newsForm.markAsUntouched();
-          } else if (!res.success) {
-            Swal.fire({
-              text: res.message,
-              icon: 'error',
-              timer: 5000, // Auto-close after 2 seconds
-              timerProgressBar: true,
-            });
-          }
-        },
-        error: (err: any) => {
-          // Handle validation errors from the server
-          if (err.status === 400) {
-            const validationErrors = err.error.errors;
-            for (const field in validationErrors) {
-              const formControl = this.newsForm.get(
-                field.charAt(0).toLowerCase() + field.slice(1)
-              );
-              if (formControl) {
-                formControl.setErrors({
-                  serverError: validationErrors[field].join(' '),
-                });
-              }
-            }
-          }
-        },
-      });
+  clickToSlideMainNews(newsType: string, subType: string) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.isShowSlider = true;
+    this.SliderType = newsType;
+    if (newsType == 'Featured News' && subType == 'Large') {
+      this.SliderList = this.FeaturedNewsLargeList;
     }
+    if (newsType == 'Featured News' && subType == 'Medium') {
+      this.SliderList = this.FeaturedNewsMediumList;
+    }
+    if (newsType == 'Featured News' && subType == 'Small') {
+      this.SliderList = this.FeaturedNewsSmallList;
+    }
+    if (newsType == 'Latest News' && subType == 'Large') {
+      this.SliderList = this.LatestNewsLargeList;
+    }
+    if (newsType == 'Latest News' && subType == 'Small') {
+      this.SliderList = this.LatestNewsSmallList;
+    }
+    if (newsType == 'Popular News' && subType == 'Large') {
+      this.SliderList = this.PopularNewsLargeList;
+    }
+    if (newsType == 'Popular News' && subType == 'Small') {
+      this.SliderList = this.PopularNewsSmallList;
+    }
+
+    this.animationState = 'hidden';
   }
 
   logos = [
@@ -234,15 +164,31 @@ export class HomeComponent implements OnInit {
     dots: false, // Hide navigation dots
     pauseOnHover: false, // Prevent pausing when hovered
   };
-  // Safely access localStorage only in the browser
-  private isBrowser(): boolean {
-    return isPlatformBrowser(this.platformId);
-  }
-  logOut() {
-    if (this.isBrowser()) {
-      localStorage.removeItem('authToken');
-      localStorage.clear();
-      this.isLoggedIn = this.AuthService.isLoggedIn();
-    }
+
+  // slideConfigSlide = {
+  //   slidesToShow: 4, // Number of logos visible at a time
+  //   autoplay: true, // Enable auto-sliding
+  //   autoplaySpeed: 0, // Remove delays between slides
+  //   speed: 5000, // Control smoothness of scrolling
+  //   infinite: true, // Infinite loop
+  //   cssEase: 'linear', // Continuous linear movement
+  //   arrows: false, // Hide navigation arrows
+  //   dots: false, // Hide navigation dots
+  //   pauseOnHover: false, // Prevent pausing when hovered
+  // };
+
+  slideConfigSlide = {
+    slidesToShow: 1,
+    speed: 500, // Adjust speed for manual navigation
+    infinite: true,
+    cssEase: 'linear',
+    arrows: false, // We will use custom buttons
+    dots: false,
+    pauseOnHover: false,
+  };
+
+  GoBack() {
+    this.isShowSlider = false;
+    this.GetAllNews();
   }
 }

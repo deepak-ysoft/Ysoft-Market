@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
+import { retry } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -24,5 +25,12 @@ export class HomeService {
 
   DeleteNews(id: number) {
     return this.http.delete(`${this.baseUrl}api/Home/DeleteNews/${id}`);
+  }
+
+  UpdateSelected(selectedNews: number) {
+    return this.http.post<number>(
+      `${this.baseUrl}api/Home/UpdateSelection`,
+      selectedNews
+    );
   }
 }

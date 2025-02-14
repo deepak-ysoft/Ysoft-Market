@@ -1,1 +1,19 @@
 /* You can add global styles to this file, and also import other style files */
+.mat-mdc-tooltip-surface {
+   background-color: #ffb2a0da !important;
+   color: rgb(0, 0, 0) !important;
+   font-size: 18px !important;
+   z-index: 1000 !important; /* Ensure it appears above other elements */
+   padding: 10px !important; /* Optional: Adjust padding */
+   border-radius: 5px !important; /* Optional: Rounded corners */
+}
+
+* {
+   font-family: initial;
+   caret-color: transparent; /* Hide the cursor globally */
+}
+/* Show cursor only inside input fields */
+input,
+textarea {
+   caret-color: auto;
+}

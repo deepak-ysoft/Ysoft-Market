@@ -15,5 +15,7 @@ namespace Ysoft_Market_API.Models
         public string? ImagePath { get; set; }
         [NotMapped]
         public IFormFile? Photo { get; set; }
+        public bool? Show { get; set; }
+        public bool isDelete { get; set; }
     }
 }

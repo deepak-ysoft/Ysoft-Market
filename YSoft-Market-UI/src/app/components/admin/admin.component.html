@@ -1,0 +1,323 @@
+<div class="container-fluid mt-4">
+  <!-- Selection Options -->
+  <div *ngIf="showOptions" class="text-center">
+    <h4>Select News Type</h4>
+    <button class="btn btn-primary m-2" (click)="GetLists('Featured News')">
+      Featured <i class="fa-solid fa-list ms-1"></i>
+    </button>
+    <button class="btn btn-primary m-2" (click)="GetLists('Latest News')">
+      Latest <i class="fa-solid fa-list ms-1"></i>
+    </button>
+    <button class="btn btn-primary m-2" (click)="GetLists('Popular News')">
+      Popular <i class="fa-solid fa-list ms-1"></i>
+    </button>
+  </div>
+
+  <!-- Form -->
+
+  <div
+    class="form-container container rounded my-3 shadow-lg"
+    *ngIf="showOptions || isEdit"
+  >
+    <form [formGroup]="newsForm" (ngSubmit)="submitForm()">
+      <div
+        class="px-4 pt-4 d-flex justify-content-between align-items-center w-100"
+      >
+        <h4 *ngIf="isEdit">Edit News</h4>
+        <h4 *ngIf="!isEdit">Create News</h4>
+
+        <i
+          class="fa-solid fa-xmark fa-xl close-icon"
+          *ngIf="isEdit"
+          (click)="isEdit = false"
+        ></i>
+      </div>
+      <hr class="mt-2 mb-4" />
+
+      <div class="px-4 pb-4">
+        <input type="hidden" formControlName="id" />
+        <input type="hidden" formControlName="type" />
+        <input type="hidden" formControlName="subType" />
+        <div class="row" *ngIf="!isEdit">
+          <div class="mb-3 col">
+            <label for="type" class="form-label">Type</label>
+            <select class="form-select magic-input" formControlName="type">
+              <option value="" disabled>Select Type</option>
+              <option value="Featured News">Featured News</option>
+              <option value="Latest News">Latest News</option>
+              <option value="Popular News">Popular News</option>
+            </select>
+            <div
+              *ngIf="
+                newsForm.get('type')?.invalid && newsForm.get('type')?.touched
+              "
+              class="text-danger"
+            >
+              Type is required.
+            </div>
+          </div>
+          <div class="mb-3 col">
+            <label for="subType" class="form-label">Sub Type</label>
+            <select class="form-select magic-input" formControlName="subType">
+              <option value="" disabled>Select Sub Type</option>
+              <option value="Large">
+                Large (Recommended Image Size ratio 3(hight) : 2(width))
+              </option>
+              <option value="Medium">
+                Medium (Recommended Image Size ratio 2(hight) : 3(width))
+              </option>
+              <option value="Small">
+                Small (Recommended Image Size ratio 2(hight) : 3(width))
+              </option>
+            </select>
+            <div
+              *ngIf="
+                newsForm.get('subType')?.invalid &&
+                newsForm.get('subType')?.touched
+              "
+              class="text-danger"
+            >
+              SubType is required.
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="mb-3 col">
+            <label for="date" class="form-label">Date</label>
+            <input
+              type="date"
+              class="form-control magic-input"
+              id="date"
+              formControlName="date"
+            />
+            <div
+              *ngIf="
+                newsForm.get('date')?.invalid && newsForm.get('date')?.touched
+              "
+              class="text-danger"
+            >
+              Date is required.
+            </div>
+          </div>
+
+          <div class="mb-3 col">
+            <label for="photo" class="form-label">Upload Photo</label>
+            <input
+              type="file"
+              class="form-control magic-input magic-inputFile"
+              id="photo"
+              (change)="onFileSelected($event)"
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="mb-3 col">
+            <label for="content" class="form-label">Content</label>
+            <textarea
+              class="form-control magic-input"
+              id="content"
+              formControlName="content"
+              rows="3"
+              maxlength="100"
+              (input)="updateCharacterCount()"
+            ></textarea>
+            <p class="text-end small text-muted">
+              {{ currentLength }}/100 characters
+            </p>
+
+            <div
+              *ngIf="
+                newsForm.get('content')?.invalid &&
+                newsForm.get('content')?.touched
+              "
+              class="text-danger"
+            >
+              Content must be at least 10 characters long.
+            </div>
+          </div>
+          <div class="mb-3 col">
+            <label for="comments" class="form-label">Comments</label>
+            <textarea
+              class="form-control magic-input"
+              id="comments"
+              formControlName="comments"
+              rows="3"
+              maxlength="1500"
+              (input)="updateCharacterCommentCount()"
+            ></textarea>
+            <p class="text-end small text-muted">
+              {{ currentCommentLength }}/1500 characters
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-success"
+          [disabled]="newsForm.invalid"
+        >
+          Submit
+        </button>
+
+        <button
+          type="button"
+          class="ms-5 btn btn-danger"
+          *ngIf="isEdit && !isDeleted"
+          (click)="deleteNews()"
+        >
+          Delete
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <hr class="mt-5" *ngIf="isEdit" />
+  <!-- Form end -->
+
+  <!-- News Tables (Hidden Initially) -->
+  <div *ngIf="!showOptions" class="m-3">
+    <div
+      class="px-4 pt-4 d-flex justify-content-between align-items-center w-100"
+    >
+      <i class="list-btn" *ngIf="!isDeleted" (click)="goBackOptions()">
+        <i class="fa-solid fa-arrow-left me-1"></i> Home
+      </i>
+      <i class="list-btn" *ngIf="!isDeleted" (click)="GetDeleted()"
+        ><i class="fa-solid fa-list me-1"></i> Get Deleted
+      </i>
+      <i class="list-btn" *ngIf="isDeleted" (click)="backToList()">
+        <i class="fa-solid fa-arrow-left me-1"></i> Back To List
+      </i>
+    </div>
+
+    <h2 class="text-center mb-4">{{ selectedNewsType }} News</h2>
+    <div class="row">
+      <!-- Large Table -->
+      <div class="table-responsive mb-4 col">
+        <h4 class="ps-4 pt-2">Large Table</h4>
+        <table class="table text-center shadow-lg rounded border">
+          <thead class="table-light">
+            <tr>
+              <th class="text-center">Content</th>
+              <th class="text-center">Date</th>
+              <th class="text-center">Image</th>
+              <th class="text-center">Show News</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let news of largeNewsList">
+              <td class="align-middle" (click)="scrollToTopAndEdit(news)">
+                {{ news.content }}
+              </td>
+              <td class="align-middle" (click)="scrollToTopAndEdit(news)">
+                {{ news.date | date : "MMMM d, y" }}
+              </td>
+              <td class="align-middle" (click)="scrollToTopAndEdit(news)">
+                <img
+                  *ngIf="news.imagePath"
+                  [src]="newsImage + news.imagePath"
+                  alt="News Image"
+                  class="img-thumbnail"
+                  style="width: 100px"
+                />
+              </td>
+              <td class="align-middle">
+                <input
+                  type="checkbox"
+                  [checked]="news.show"
+                  (change)="toggleSelection(news.id)"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Small Table -->
+      <div class="table-responsive mb-4 col">
+        <h4 class="ps-4 pt-2">Small Table</h4>
+        <table class="table border text-center shadow-lg rounded">
+          <thead class="table-light">
+            <tr>
+              <th class="text-center">Content</th>
+              <th class="text-center">Date</th>
+              <th class="text-center">Image</th>
+              <th class="text-center">Show News</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let news of smallNewsList">
+              <td class="align-middle" (click)="scrollToTopAndEdit(news)">
+                {{ news.content }}
+              </td>
+              <td class="align-middle" (click)="scrollToTopAndEdit(news)">
+                {{ news.date | date : "MMMM d, y" }}
+              </td>
+              <td class="align-middle" (click)="scrollToTopAndEdit(news)">
+                <img
+                  *ngIf="news.imagePath"
+                  [src]="newsImage + news.imagePath"
+                  alt="News Image"
+                  class="img-thumbnail"
+                  style="width: 100px"
+                />
+              </td>
+              <td class="align-middle">
+                <input
+                  type="checkbox"
+                  [checked]="news.show"
+                  (change)="toggleSelection(news.id)"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Medium Table -->
+    <div
+      class="table-responsive container mb-4 shadow-lg rounded"
+      *ngIf="selectedNewsType == 'Featured News'"
+    >
+      <h4 class="ps-4 pt-2">Medium Table</h4>
+      <table class="table border text-center">
+        <thead class="table-light">
+          <tr>
+            <th class="text-center">Content</th>
+            <th class="text-center">Date</th>
+            <th class="text-center">Image</th>
+            <th class="text-center">Show News</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let news of mediumNewsList">
+            <td class="align-middle" (click)="scrollToTopAndEdit(news)">
+              {{ news.content }}
+            </td>
+            <td class="align-middle" (click)="scrollToTopAndEdit(news)">
+              {{ news.date | date : "MMMM d, y" }}
+            </td>
+            <td class="align-middle" (click)="scrollToTopAndEdit(news)">
+              <img
+                *ngIf="news.imagePath"
+                [src]="newsImage + news.imagePath"
+                alt="News Image"
+                class="img-thumbnail"
+                style="width: 100px"
+              />
+            </td>
+            <td class="align-middle">
+              <input
+                type="checkbox"
+                [checked]="news.show"
+                (change)="toggleSelection(news.id)"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

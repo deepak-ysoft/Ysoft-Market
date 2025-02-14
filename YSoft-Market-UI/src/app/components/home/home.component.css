@@ -67,6 +67,9 @@ a:hover .image-containt {
    transition: color 0.3s ease-in-out;
 }
 
+.f-family {
+   font-family: Serif;
+}
 .overlay-container:hover .zoom-container,
 .overlay-container:hover .zoom-container-f-mid,
 .overlay-container:hover .zoom-container-f-small,
@@ -137,10 +140,6 @@ a:hover .image-containt {
    color: rgb(248, 91, 0);
 }
 
-.font-style {
-   font-family: initial;
-}
-
 .logos-slider {
    width: 100%;
    margin: auto;
@@ -190,9 +189,116 @@ a:hover .image-containt {
 }
 
 .add-btn-color {
-   background-color: rgb(255, 138, 71);
+   background-color: rgba(210, 210, 210, 0.517);
 }
 .add-btn-color:hover {
-   background-color: rgb(248, 91, 0);
-   color: white;
+   background-color: rgba(173, 173, 173, 0.514);
+}
+
+/* slider style */
+
+.news-slider {
+   width: 100%;
+   margin: 0 auto;
+}
+
+.news-slide {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+}
+
+/* .zoom-container-news {
+   transition: transform 0.3s ease-in-out;
+   width: 100%;
+   display: block;
+}
+
+.zoom-container-news img {
+   width: 100%;
+}
+
+.overlay-container-news:hover .zoom-container-news {
+   transform: scale(1.1); 
+}
+
+.overlay-container-news {
+   position: relative;
+   cursor: pointer;
+   overflow: hidden;
+}
+
+.overlay-content-news {
+   position: absolute;
+   bottom: 0;
+   left: 0;
+   width: 100%;
+   background: rgba(0, 0, 0, 0.6);
+   padding: 10px;
+   transition: background 0.3s; 
+}
+
+.overlay-container-news:hover .overlay-content-news {
+   background: rgb(248, 91, 0);
+} */
+
+.main-container {
+   width: 1200px;
+}
+.image-container {
+   padding: 2%;
+   width: 40%; /* Keep container width flexible */
+   display: flex;
+   align-items: center; /* Center image vertically */
+   justify-content: flex-start; /* Ensure image starts from the left */
+}
+
+.image-container img {
+   max-height: 600px; /* Maximum height */
+   width: auto; /* Default: Maintain aspect ratio */
+   max-width: 100%; /* Prevents overflow */
+   object-fit: contain; /* Ensures entire image is visible */
+   display: block; /* Avoids extra spacing issues */
+}
+
+/* If image height is 600px or more, set width to 400px */
+@media (min-height: 600px) {
+   .image-container img {
+      width: 400px; /* Set fixed width */
+      height: 600px; /* Fix height */
+      object-fit: contain; /* Ensures proper fit */
+   }
+}
+
+.content-container {
+   align-content: center; /* Center image vertically */
+   width: 60%;
+   padding: 3%;
+}
+
+/* slide btn */
+
+.slider-btn {
+   position: absolute;
+   top: 50%;
+   transform: translateY(-50%);
+   background-color: rgba(210, 210, 210, 0.42);
+   border: none;
+   padding: 10px 15px;
+   font-size: 24px;
+   cursor: pointer;
+   z-index: 10;
+   border-radius: 50%;
+}
+
+.slider-btn.left {
+   left: 10px;
+}
+
+.slider-btn.right {
+   right: 10px;
+}
+
+.slider-btn:hover {
+   background-color: rgba(173, 173, 173, 0.514);
 }

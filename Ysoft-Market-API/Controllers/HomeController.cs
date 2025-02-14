@@ -28,14 +28,16 @@ namespace Ysoft_Market_API.Controllers
         {
             try
             {
-                var FeaturedNewsLarge = _context.News.Where(x => x.Type == "Featured News" && x.SubType == "Large").ToList();
-                var FeaturedNewsMedium = _context.News.Where(x => x.Type == "Featured News" && x.SubType == "Medium").ToList();
-                var FeaturedNewsSmall = _context.News.Where(x => x.Type == "Featured News" && x.SubType == "Small").ToList();
-                var LatestNewsLarge = _context.News.Where(x => x.Type == "Latest News" && x.SubType == "Large").ToList();
-                var LatestNewsSmall = _context.News.Where(x => x.Type == "Latest News" && x.SubType == "Small").ToList();
-                var PopularNewsLarge = _context.News.Where(x => x.Type == "Popular News" && x.SubType == "Large").ToList();
-                var PopularNewsSmall = _context.News.Where(x => x.Type == "Popular News" && x.SubType == "Small").ToList();
-                return Ok(new { FeaturedNewsLarge, FeaturedNewsMedium, FeaturedNewsSmall, LatestNewsLarge, LatestNewsSmall, PopularNewsLarge, PopularNewsSmall });
+                var FeaturedNewsLarge = _context.News.Where(x => x.Type == "Featured News" && x.isDelete == false && x.SubType == "Large").ToList();
+                var FeaturedNewsMedium = _context.News.Where(x => x.Type == "Featured News" && x.isDelete == false && x.SubType == "Medium").ToList();
+                var FeaturedNewsSmall = _context.News.Where(x => x.Type == "Featured News" && x.isDelete == false && x.SubType == "Small").ToList();
+                var LatestNewsLarge = _context.News.Where(x => x.Type == "Latest News" && x.isDelete == false && x.SubType == "Large").ToList();
+                var LatestNewsSmall = _context.News.Where(x => x.Type == "Latest News" && x.isDelete == false && x.SubType == "Small").ToList();
+                var PopularNewsLarge = _context.News.Where(x => x.Type == "Popular News" && x.isDelete == false && x.SubType == "Large").ToList();
+                var PopularNewsSmall = _context.News.Where(x => x.Type == "Popular News" && x.isDelete == false && x.SubType == "Small").ToList();
+                var allNews = _context.News.Where(x => x.isDelete == false).ToList();
+                var allDeletedNews = _context.News.Where(x => x.isDelete == true).ToList();
+                return Ok(new { FeaturedNewsLarge, FeaturedNewsMedium, FeaturedNewsSmall, LatestNewsLarge, LatestNewsSmall, PopularNewsLarge, PopularNewsSmall, allNews, allDeletedNews });
             }
             catch (Exception ex)
             {
@@ -49,7 +51,6 @@ namespace Ysoft_Market_API.Controllers
         /// </summary>
         /// <param name="news">NewsModel Model object</param>
         /// <returns>message</returns>
-        [Authorize]
         [HttpPost("AddUpdateNews")]
         public async Task<IActionResult> AddUpdateNews([FromForm] NewsModel news)
         {
@@ -59,22 +60,7 @@ namespace Ysoft_Market_API.Controllers
             {
                 if (news.Id == 0 || news.Id == null)
                 {
-                    var FeaturedNewsLarge = _context.News.Where(x => x.Type == "Featured News" && x.SubType == "Large").ToList();
-                    var FeaturedNewsMedium = _context.News.Where(x => x.Type == "Featured News" && x.SubType == "Medium").ToList();
-                    var FeaturedNewsSmall = _context.News.Where(x => x.Type == "Featured News" && x.SubType == "Small").ToList();
-                    var LatestNewsLarge = _context.News.Where(x => x.Type == "Latest News" && x.SubType == "Large").ToList();
-                    var PopularNewsLarge = _context.News.Where(x => x.Type == "Popular News" && x.SubType == "Large").ToList();
 
-                    if (FeaturedNewsLarge.Count >= 2 && news.Type == "Featured News" && news.SubType == "Large")
-                        return Ok(new { success = false, message = "You can add only two large in Featured News." });
-                    if (FeaturedNewsMedium.Count >= 2 && news.Type == "Featured News" && news.SubType == "Medium")
-                        return Ok(new { success = false, message = "You can add only two medium in Featured News." });
-                    if (FeaturedNewsSmall.Count >= 6 && news.Type == "Featured News" && news.SubType == "Small")
-                        return Ok(new { success = false, message = "You can add only six small in Featured News." });
-                    if (LatestNewsLarge.Count >= 1 && news.Type == "Latest News" && news.SubType == "Large")
-                        return Ok(new { success = false, message = "You can add only One large in Latest News." });
-                    if (PopularNewsLarge.Count >= 1 && news.Type == "Popular News" && news.SubType == "Large")
-                        return Ok(new { success = false, message = "You can add only One large in Popular News." });
                     if ((news.Type == "Latest News" || news.Type == "Popular News") && news.SubType == "Medium")
                         return Ok(new { success = false, message = "Medium Size Image Not Available In Latest And Popular News." });
                 }
@@ -91,11 +77,76 @@ namespace Ysoft_Market_API.Controllers
         }
 
         /// <summary>
+        /// To show selected data
+        /// </summary>
+        /// <param name="selectedNewsIds"></param>
+        /// <returns></returns>
+        [HttpPost("UpdateSelection")]
+        public async Task<IActionResult> UpdateSelection([FromBody] int newsId)
+        {
+            var news = await _context.News.FindAsync(newsId);
+            if (news == null)
+            {
+                return NotFound(new { success = false, message = "News item not found." });
+            }
+
+            // Check existing counts to prevent exceeding limits
+            var allNews = await _context.News.ToListAsync();
+            var newLargeF = allNews.Count(x => x.Show == true && x.Type == "Featured News" && x.SubType == "Large");
+            var newMediumF = allNews.Count(x => x.Show == true && x.Type == "Featured News" && x.SubType == "Medium");
+            var newSmallF = allNews.Count(x => x.Show == true && x.Type == "Featured News" && x.SubType == "Small");
+            var newLargeL = allNews.Count(x => x.Show == true && x.Type == "Latest News" && x.SubType == "Large");
+            var newLargeP = allNews.Count(x => x.Show == true && x.Type == "Popular News" && x.SubType == "Large");
+
+            // If trying to add this news, check limits
+            if ((bool)!news.Show)
+            {
+                if (news.Type == "Featured News" && news.SubType == "Large" && newLargeF >= 2)
+                    return Ok(new { success = false, message = "You can add only two Large in Featured News." });
+                if (news.Type == "Featured News" && news.SubType == "Medium" && newMediumF >= 2)
+                    return Ok(new { success = false, message = "You can add only two Medium in Featured News." });
+                if (news.Type == "Featured News" && news.SubType == "Small" && newSmallF >= 6)
+                    return Ok(new { success = false, message = "You can add only six Small in Featured News." });
+                if (news.Type == "Latest News" && news.SubType == "Large" && newLargeL >= 1)
+                    return Ok(new { success = false, message = "You can add only one Large in Latest News." });
+                if (news.Type == "Popular News" && news.SubType == "Large" && newLargeP >= 1)
+                    return Ok(new { success = false, message = "You can add only one Large in Popular News." });
+
+                // Delete and Re-add only for the last selected item
+                _context.News.Remove(news);
+                await _context.SaveChangesAsync(); // Commit deletion first
+
+                var newNews = new NewsModel
+                {
+                    Date = news.Date,
+                    Type = news.Type,
+                    SubType = news.SubType,
+                    Content = news.Content,
+                    Comments = news.Comments,
+                    Show = true,
+                    isDelete = false,
+                    ImagePath = news.ImagePath
+                };
+                await _context.News.AddAsync(newNews);
+
+                //// If within limits, toggle `Show` to true
+                //news.Show = true;
+            }
+            else
+            {
+                // If deselected, toggle `Show` to false
+                news.Show = false;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Updated!" });
+        }
+
+        /// <summary>
         ///  Detele news
         /// </summary>
         /// <param name="id"> News id</param>
         /// <returns>message</returns>
-        [Authorize]
         [HttpDelete("DeleteNews/{id}")]
         public async Task<IActionResult> DeleteNews(int id)
         {

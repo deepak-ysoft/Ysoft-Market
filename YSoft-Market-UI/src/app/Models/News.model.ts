@@ -7,4 +7,5 @@ export class News {
   comments: string = '';
   imagePath: string = '';
   photo?: File; // Using File for handling file uploads
+  show?: boolean ;
 }
